@@ -1,0 +1,31 @@
+-- FUNCTION: public.actualizardetalle(integer, json)
+
+-- DROP FUNCTION public.actualizardetalle(integer, json);
+
+CREATE OR REPLACE FUNCTION public.actualizardetalle(
+	idcabe integer,
+	productos json)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+AS $BODY$
+DECLARE
+	i json;
+	respuesta int;
+	numRegistro int;
+BEGIN 
+	respuesta:=0;
+	DELETE FROM detalle where cab_id=idcabe;
+		FOR i IN SELECT * FROM json_array_elements(productos)
+		  LOOP
+			insert into detalle(cab_id,det_producto,det_cantidad,det_valor,det_estado)
+			values(idcabe,i->>'det_producto',CAST (i->>'det_cantidad' AS INTEGER),CAST (i->>'det_valor' AS real),i->>'det_estado');
+			respuesta:=1;
+		 END LOOP;
+	return respuesta;
+END;
+$BODY$;
+
+ALTER FUNCTION public.actualizardetalle(integer, json)
+    OWNER TO postgres;

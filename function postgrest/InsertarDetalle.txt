@@ -1,0 +1,33 @@
+-- FUNCTION: public.insertardetalle(integer, text, integer, real, text)
+
+-- DROP FUNCTION public.insertardetalle(integer, text, integer, real, text);
+
+CREATE OR REPLACE FUNCTION public.insertardetalle(
+	idfactura integer,
+	producto text,
+	cantidad integer,
+	valor real,
+	estado text)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+AS $BODY$
+DECLARE
+	id_capturado int;
+	respuesta int;
+BEGIN 
+	id_capturado:=(Select cab_id from cabecera order by cab_id desc limit 1);
+	if idfactura =id_capturado then
+		insert into detalle(cab_id,det_producto,det_cantidad,det_valor,det_estado)
+		values(idfactura,producto,cantidad,valor,estado);
+		respuesta:=1;
+	else
+		respuesta:=0;	
+	end if;
+	return respuesta;
+END;
+$BODY$;
+
+ALTER FUNCTION public.insertardetalle(integer, text, integer, real, text)
+    OWNER TO postgres;

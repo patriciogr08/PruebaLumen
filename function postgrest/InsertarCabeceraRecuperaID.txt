@@ -1,0 +1,31 @@
+-- FUNCTION: public.insertarcabecera(text, text)
+
+-- DROP FUNCTION public.insertarcabecera(text, text);
+
+CREATE OR REPLACE FUNCTION public.insertarcabecera(
+	cli text,
+	est text)
+    RETURNS integer
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+AS $BODY$
+DECLARE
+	id_capturado int;
+	id_generado int;
+	respuesta int;
+BEGIN 
+	id_capturado := (select cab_id from cabecera order by cab_id desc limit 1);
+	insert into cabecera(cab_cliente,cab_estado) values (cli,est);
+	id_generado := (select cab_id from cabecera order by cab_id desc limit 1);
+	if id_generado>id_capturado then
+		 respuesta:=id_generado;
+		else
+		 respuesta:=0;
+	end if;
+	return respuesta;
+END;
+$BODY$;
+
+ALTER FUNCTION public.insertarcabecera(text, text)
+    OWNER TO postgres;
